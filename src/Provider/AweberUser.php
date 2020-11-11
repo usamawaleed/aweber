@@ -1,7 +1,7 @@
 <?php
 
 
-namespace League\OAuth2\Client\Provider;
+namespace usamawaleed\AWeber\Provider;
 
 
 class AweberUser

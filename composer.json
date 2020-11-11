@@ -16,7 +16,7 @@
 	
 	"autoload":{
 		"psr-4":{
-            "League\\OAuth2\\Client\\": "src/"
+            "usamawaleed\\AWeber\\": "src/"
 		}
 	}
 	
