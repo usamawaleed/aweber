@@ -1,0 +1,23 @@
+{
+    "name": "league/oauth2-aweber",
+    "description": "OAuth 2.0 Client Provider for The PHP League OAuth2-Client",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "usama waleed",
+            "email": "usama_waleed@yahoo.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "league/oauth2-client": "^2.0"
+	},
+	
+	"autoload":{
+		"psr-4":{
+            "League\\OAuth2\\Client\\": "src/"
+		}
+	}
+	
+}
