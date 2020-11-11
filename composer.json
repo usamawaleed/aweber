@@ -1,5 +1,5 @@
 {
-    "name": "league/oauth2-aweber",
+    "name": "usamawaleed/aweber",
     "description": "OAuth 2.0 Client Provider for The PHP League OAuth2-Client",
     "type": "library",
     "license": "MIT",
