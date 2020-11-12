@@ -1,7 +1,7 @@
 <?php
 
 
-namespace usamawaleed\AWeber\Provider;
+namespace usamawaleed\AWeber\AWeber;
 
 
 use GuzzleHttp\Client;
@@ -10,6 +10,11 @@ use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
 use League\OAuth2\Client\Token\AccessToken;
 use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 use Psr\Http\Message\ResponseInterface;
+use usamawaleed\AWeber\AWeber\Model\Account;
+use usamawaleed\AWeber\AWeber\Model\Collection\AccountCollection;
+use usamawaleed\AWeber\Aweber\Model\Collection\ListCollection;
+use usamawaleed\AWeber\Aweber\Model\Lists;
+use usamawaleed\AWeber\AWeber\Model\User;
 
 class Aweber extends AbstractProvider
 {
@@ -63,7 +68,7 @@ class Aweber extends AbstractProvider
 
     protected function createResourceOwner(array $response, AccessToken $token)
     {
-        return new AweberUser($response);
+        return new User($response);
     }
 
     protected function checkResponse(ResponseInterface $response, $data)
@@ -77,19 +82,45 @@ class Aweber extends AbstractProvider
     /**
      * @param $accessToken
      * @param $url
-     * @return AweberUserCollection
+     * @return Model\Collection\AbstractCollection
      */
-    function getCollection($accessToken, $url)
+    function getAccounts($accessToken, $url)
     {
-        $collection = $this->sendRequest($url, $accessToken);
-        return new AweberUserCollection($collection[0]);
+        $accounts = $this->sendRequest($url, $accessToken);
+
+        $collection = new AccountCollection();
+
+        foreach ($accounts as $item)
+        {
+            $entity = new Account($item);
+
+            try{
+                $collection->addItem($entity);
+
+            }catch (\Exception $e)
+            {
+                echo $e->getMessage();
+                exit;
+            }
+        }
+
+        return $collection;
     }
 
     function getList($accessToken, $url)
     {
-        $list = $this->sendRequest($url, $accessToken);
-        return $list;
-//        return new AweberUserCollection($collection[0]);
+        $lists = $this->sendRequest($url, $accessToken);
+
+        $collection = new ListCollection();
+
+        foreach ($lists as $item)
+        {
+            $list = new Lists($item);
+            $collection->addItem($list);
+        }
+
+        return $collection;
+
     }
 
     private function verifyUrl($url)

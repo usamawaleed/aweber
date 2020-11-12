@@ -1,12 +1,12 @@
 <?php
 
 
-namespace usamawaleed\AWeber\Provider;
+namespace usamawaleed\AWeber\AWeber\Model;
 
 
 use League\OAuth2\Client\Provider\ResourceOwnerInterface;
 
-class AweberUser implements ResourceOwnerInterface
+class User implements ResourceOwnerInterface
 {
     /**
      * @var array $data
@@ -14,7 +14,7 @@ class AweberUser implements ResourceOwnerInterface
     protected $data;
 
     /**
-     * AweberUser constructor.
+     * User constructor.
      * @param array $response
      */
     public function __construct(array $response)
@@ -44,7 +44,7 @@ class AweberUser implements ResourceOwnerInterface
 
     public function getDetail()
     {
-        return new AweberUserCollection($this->getField('entries')[0]);
+        return new Account($this->getField('entries')[0]);
     }
 
     /**

@@ -1,9 +1,9 @@
 <?php
 
 
-namespace usamawaleed\AWeber\Provider;
+namespace usamawaleed\AWeber\Aweber\Model;
 
-class AweberUserLists
+class Lists
 {
     /**
      * @var array $data
