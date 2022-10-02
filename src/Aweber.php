@@ -74,7 +74,7 @@ class Aweber extends AbstractProvider
     protected function checkResponse(ResponseInterface $response, $data)
     {
         if (!empty($data['error'])) {
-            $message = $data['error']['type'].': '.$data['error']['message'];
+            $message = $data['error']['type'] . ': ' . $data['error']['message'];
             throw new IdentityProviderException($message, $data['error']['code'], $data);
         }
     }
@@ -90,15 +90,13 @@ class Aweber extends AbstractProvider
 
         $collection = new AccountCollection();
 
-        foreach ($accounts as $item)
-        {
+        foreach ($accounts as $item) {
             $entity = new Account($item);
 
-            try{
+            try {
                 $collection->addItem($entity);
 
-            }catch (\Exception $e)
-            {
+            } catch (\Exception $e) {
                 echo $e->getMessage();
                 exit;
             }
@@ -113,8 +111,7 @@ class Aweber extends AbstractProvider
 
         $collection = new ListCollection();
 
-        foreach ($lists as $item)
-        {
+        foreach ($lists as $item) {
             $list = new Lists($item);
             $collection->addItem($list);
         }
@@ -125,8 +122,7 @@ class Aweber extends AbstractProvider
 
     private function verifyUrl($url)
     {
-        if(strpos($url, $this->getBaseUrl())!==0)
-        {
+        if (strpos($url, $this->getBaseUrl()) !== 0) {
             $url = $this->getBaseUrl() . $url;
         }
 
