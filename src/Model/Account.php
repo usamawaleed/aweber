@@ -24,39 +24,53 @@ class Account implements ResourceOwnerInterface
 
     public function getId()
     {
-        return $this->getEntries('id');
+        return $this->getField('id');
     }
 
     public function toArray()
     {
-        // TODO: Implement toArray() method.
+        return $this->data;
     }
 
     public function getSelfLink()
     {
-        return $this->getEntries('self_link');
+        return $this->getField('self_link');
     }
 
     public function getAnalyticsSrc()
     {
-        return $this->getEntries('analytics_src');
+        return $this->getField('analytics_src');
     }
 
     public function getResourceTypeLink()
     {
-        return $this->getEntries('resource_type_link');
+        return $this->getField('resource_type_link');
     }
 
     public function getListCollectionLink()
     {
-        return $this->getEntries('lists_collection_link');
+        return $this->getField('lists_collection_link');
     }
 
     public function getIntegrationsCollectionLink()
     {
-        return $this->getEntries('integrations_collection_link');
+        return $this->getField('integrations_collection_link');
     }
 
+    public function getHttpEtag()
+    {
+        return $this->getField('http_etag');
+    }
+
+    public function getUuid()
+    {
+        return $this->getField('uuid');
+    }
+
+    public function getCompany()
+    {
+        return $this->getField('company');
+    }
 
     /**
      * Returns a field from the data.
@@ -66,18 +80,6 @@ class Account implements ResourceOwnerInterface
      * @return mixed|null
      */
     private function getField($key)
-    {
-        return isset($this->data[$key]) ? $this->data[$key] : null;
-    }
-
-    /**
-     * Returns a field from the data.
-     *
-     * @param string $key
-     *
-     * @return mixed|null
-     */
-    private function getEntries($key)
     {
         return isset($this->data[$key]) ? $this->data[$key] : null;
     }
