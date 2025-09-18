@@ -6,11 +6,10 @@ use usamawaleed\AWeber\Model\Account;
 
 require_once ('vendor/autoload.php');
 
-// IMPORTANT: Replace with your client credentials
 $config = [
-    'clientId'          => 'YOUR_CLIENT_ID',
-    'clientSecret'      => 'YOUR_CLIENT_SECRET',
-    'redirectUri'       => 'YOUR_REDIRECT_URI',
+    'clientId'          => 'cbzcZ4dUPWWRWJ17fUOiH6hWSvD9zxYX',
+    'clientSecret'      => 'F540YofNElyFeTbCKshcgb7jJUuxa7Cx',
+    'redirectUri'       => 'https://aweberoauth.com',
 ];
 
 $provider = new Aweber($config);
