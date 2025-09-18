@@ -5,76 +5,104 @@ use usamawaleed\AWeber\Aweber;
 use usamawaleed\AWeber\Model\Account;
 
 require_once ('vendor/autoload.php');
-$baseURL = 'https://api.aweber.com/1.0/';
 
-$url = 'https://api.aweber.com/1.0/accounts';
-//echo strtotime(date('Y-m-d H:i:s'));
-//exit;
-
+// IMPORTANT: Replace with your client credentials
 $config = [
-    'clientId'          => 'cbzcZ4dUPWWRWJ17fUOiH6hWSvD9zxYX',
-    'clientSecret'      => 'F540YofNElyFeTbCKshcgb7jJUuxa7Cx',
-    'redirectUri'       => 'https://aweberoauth.com',
+    'clientId'          => 'YOUR_CLIENT_ID',
+    'clientSecret'      => 'YOUR_CLIENT_SECRET',
+    'redirectUri'       => 'YOUR_REDIRECT_URI',
 ];
 
 $provider = new Aweber($config);
-$accessToken = '';
-//unset($_SESSION['access_token']);
+
 echo '<pre>';
-if(empty($_GET['code']) && !isset($_SESSION['access_token']))
-{
-    $oauthUrl = $provider->getAuthorizationUrl();
+
+// If we don't have an authorization code then get one
+if (!isset($_GET['code'])) {
+    // Fetch the authorization URL from the provider; this returns the urlAuthorize option and generates and stores a state
+    $authorizationUrl = $provider->getAuthorizationUrl();
     $_SESSION['oauth2state'] = $provider->getState();
+    echo '<a href="' . $authorizationUrl . '">Connect Me</a>';
+    exit;
 
-    echo '<a href="'.$oauthUrl.'">Connect Me</a>';
-}elseif(!isset($_SESSION['access_token'])){
-    $accessToken = $provider->getAccessToken('authorization_code', [
-        'code' => $_GET['code']
-    ]);
-    print_r($accessToken);
-    $_SESSION['access_token'] = $accessToken->getToken();
-    $_SESSION['refresh_token'] = $accessToken->getRefreshToken();
+// Check given state against previously stored one to mitigate CSRF attack
+} elseif (empty($_GET['state']) || (isset($_SESSION['oauth2state']) && $_GET['state'] !== $_SESSION['oauth2state'])) {
+    if (isset($_SESSION['oauth2state'])) {
+        unset($_SESSION['oauth2state']);
+    }
+    exit('Invalid state');
+} else {
+    try {
+        // Try to get an access token using the authorization code grant.
+        $accessToken = $provider->getAccessToken('authorization_code', [
+            'code' => $_GET['code']
+        ]);
 
+        // We have an access token, which we may use in authenticated
+        // requests against the service provider's API.
+        echo 'Access Token: ' . $accessToken->getToken() . "<br>";
+        echo 'Refresh Token: ' . $accessToken->getRefreshToken() . "<br>";
+        echo 'Expired in: ' . $accessToken->getExpires() . "<br>";
+        echo 'Already expired? ' . ($accessToken->hasExpired() ? 'Yes' : 'No') . "<br>";
+
+        // Using the access token, we may look up details about the
+        // resource owner.
+        /** @var Account $resourceOwner */
+        $resourceOwner = $provider->getResourceOwner($accessToken);
+
+        printf('Hello %s!', $resourceOwner->getCompany());
+        echo "\n\n";
+
+        // Get accounts
+        $accounts = $provider->getAccounts($accessToken, 'accounts');
+        echo "Accounts:\n";
+        print_r($accounts->toArray());
+
+        // Get lists
+        $firstAccount = $accounts->getIterator()->current();
+        $lists = $provider->getList($accessToken, 'accounts/' . $firstAccount->getId() . '/lists');
+        echo "Lists:\n";
+        print_r($lists->toArray());
+
+        // Get subscribers
+        $firstList = $lists->getIterator()->current();
+        $subscribers = $provider->getSubscribers($accessToken, 'accounts/' . $firstAccount->getId() . '/lists/' . $firstList->getId() . '/subscribers');
+        echo "Subscribers:\n";
+        print_r($subscribers->toArray());
+
+        /*
+        // Add a subscriber
+        $newSubscriberData = [
+            'email' => 'test.subscriber@example.com',
+            'name' => 'Test Subscriber'
+        ];
+        $newSubscriber = $provider->addSubscriber($accessToken, 'accounts/' . $firstAccount->getId() . '/lists/' . $firstList->getId() . '/subscribers', $newSubscriberData);
+        echo "New Subscriber:\n";
+        print_r($newSubscriber);
+        */
+
+        /*
+        // Update a subscriber
+        $subscriberToUpdate = $subscribers->getIterator()->current();
+        $updatedData = [
+            'name' => 'Updated Test Subscriber'
+        ];
+        $updatedSubscriber = $provider->updateSubscriber($accessToken, 'accounts/' . $firstAccount->getId() . '/lists/' . $firstList->getId() . '/subscribers/' . $subscriberToUpdate->getId(), $updatedData);
+        echo "Updated Subscriber:\n";
+        print_r($updatedSubscriber);
+        */
+
+        /*
+        // Delete a subscriber
+        $subscriberToDelete = $subscribers->getIterator()->current();
+        $result = $provider->deleteSubscriber($accessToken, 'accounts/' . $firstAccount->getId() . '/lists/' . $firstList->getId() . '/subscribers/' . $subscriberToDelete->getId());
+        echo "Deleted Subscriber:\n";
+        print_r($result);
+        */
+
+
+    } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+        // Failed to get the access token or user details.
+        exit($e->getMessage());
+    }
 }
-
-print_r($accessToken);
-
-
-$accessToken = $_SESSION['access_token'];
-$refreshToken = $_SESSION['refresh_token'];
-
-
-echo 'Access Token: ' . $accessToken . '<br>';
-echo 'Refresh Token: ' . $refreshToken . '<br>';
-
-//$newTokens = $provider->getNewAccessToken($config, $refreshToken);
-//$_SESSION['access_token'] = $newTokens['access_token'];
-//$_SESSION['refresh_token'] = $newTokens['refresh_token'];
-//print_r($newTokens);
-//exit;
-//echo 'TOken: ' . $accessToken->getToken().'<br>';
-//echo 'RTOken: ' . $accessToken->getRefreshToken().'<br>';
-//echo 'Expiry: ' . $accessToken->getExpires().'<br>';
-
-
-/**
- * @var $owner User
- */
-$owner = $provider->getResourceOwner($accessToken);
-//echo $owner->getDetail()->getId().'<br>';
-
-$collection = $provider->getAccounts($accessToken, 'accounts');
-pr($collection);
-/**
- * @var $item Account
- */
-foreach ($collection as $item)
-{
-    $id = $item->getId();
-}
-
-//print_r($collection);
-echo '<br>';
-$list = $provider->getList($accessToken, 'accounts/'.$id.'/lists');
-print_r($list);
-exit;
