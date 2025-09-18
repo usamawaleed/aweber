@@ -26,7 +26,17 @@ class Lists
 
     public function toArray()
     {
-        // TODO: Implement toArray() method.
+        return $this->data;
+    }
+
+    public function getHttpEtag()
+    {
+        return $this->getField('http_etag');
+    }
+
+    public function getVapidPublicKey()
+    {
+        return $this->getField('vapid_public_key');
     }
 
     public function getCampaignsCollectionLink()

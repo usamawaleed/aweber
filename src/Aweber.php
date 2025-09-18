@@ -13,8 +13,9 @@ use Psr\Http\Message\ResponseInterface;
 use usamawaleed\AWeber\Model\Account;
 use usamawaleed\AWeber\Model\Collection\AccountCollection;
 use usamawaleed\AWeber\Model\Collection\ListCollection;
+use usamawaleed\AWeber\Model\Collection\SubscriberCollection;
 use usamawaleed\AWeber\Model\Lists;
-use usamawaleed\AWeber\Model\User;
+use usamawaleed\AWeber\Model\Subscriber;
 
 class Aweber extends AbstractProvider
 {
@@ -50,7 +51,6 @@ class Aweber extends AbstractProvider
             'list.write',
             'subscriber.read',
             'subscriber.write',
-            'subscriber.read-extended',
             'email.read',
             'email.write',
         ];
@@ -68,7 +68,7 @@ class Aweber extends AbstractProvider
 
     protected function createResourceOwner(array $response, AccessToken $token)
     {
-        return new User($response);
+        return new Account($response['entries'][0]);
     }
 
     protected function checkResponse(ResponseInterface $response, $data)
@@ -105,6 +105,24 @@ class Aweber extends AbstractProvider
         return $collection;
     }
 
+    public function addSubscriber($accessToken, $url, array $data)
+    {
+        $response = $this->sendClientRequest('POST', $url, $accessToken, ['body' => json_encode($data)]);
+        return json_decode($response->getBody(), true);
+    }
+
+    public function updateSubscriber($accessToken, $url, array $data)
+    {
+        $response = $this->sendClientRequest('PATCH', $url, $accessToken, ['body' => json_encode($data)]);
+        return json_decode($response->getBody(), true);
+    }
+
+    public function deleteSubscriber($accessToken, $url)
+    {
+        $this->sendClientRequest('DELETE', $url, $accessToken);
+        return true;
+    }
+
     function getList($accessToken, $url)
     {
         $lists = $this->sendRequest($url, $accessToken);
@@ -118,6 +136,20 @@ class Aweber extends AbstractProvider
 
         return $collection;
 
+    }
+
+    function getSubscribers($accessToken, $url)
+    {
+        $subscribers = $this->sendRequest($url, $accessToken);
+
+        $collection = new SubscriberCollection();
+
+        foreach ($subscribers as $item) {
+            $subscriber = new Subscriber($item);
+            $collection->addItem($subscriber);
+        }
+
+        return $collection;
     }
 
     private function verifyUrl($url)
@@ -138,9 +170,7 @@ class Aweber extends AbstractProvider
         $data = array();
 
         while (isset($url)) {
-            $request = $client->get($url,
-                ['headers' => ['Authorization' => 'Bearer ' . $accessToken]]
-            );
+            $request = $this->sendClientRequest('GET', $url, $accessToken);
             $body = $request->getBody();
             $page = json_decode($body, true);
             $data = array_merge($page['entries'], $data);
@@ -148,6 +178,24 @@ class Aweber extends AbstractProvider
         }
 
         return $data;
+    }
+
+    private function sendClientRequest($method, $url, $accessToken, $options = [])
+    {
+        $client = new Client();
+        $url = $this->verifyUrl($url);
+
+        $default_options = [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $accessToken,
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json',
+            ]
+        ];
+
+        $options = array_merge_recursive($default_options, $options);
+
+        return $client->request($method, $url, $options);
     }
 
 
